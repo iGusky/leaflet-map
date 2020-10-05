@@ -34,16 +34,9 @@ export class MarkerService {
       for (const c of res.features) {
         const lat = c.geometry.coordinates[0];
         const lon = c.geometry.coordinates[1];
-        //const circle = L.circleMarker([lon, lat]).addTo(map);
-
-      //   const circle = L.circleMarker([lon, lat],
-      //     {
-      //       radius: 20
-      //     }
-      // ).addTo(map);
         const circle = L.circleMarker([lon, lat], {
           radius: MarkerService.ScaledRadius(c.properties.population, maxVal)
-        });//.addTo(map);
+        });
         circle.bindPopup(this.popupService.makeCapitalPopup(c.properties));
 
         circle.addTo(map);

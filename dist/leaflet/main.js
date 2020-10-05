@@ -12,6 +12,41 @@ module.exports = __webpack_require__(/*! /home/gusky/Escritorio/leaflet/src/main
 
 /***/ }),
 
+/***/ "45aq":
+/*!********************************************!*\
+  !*** ./src/app/_services/shape.service.ts ***!
+  \********************************************/
+/*! exports provided: ShapeService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ShapeService", function() { return ShapeService; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "fXoL");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ "tk/3");
+
+
+
+class ShapeService {
+    constructor(http) {
+        this.http = http;
+    }
+    getStateShapes() {
+        return this.http.get('/assets/gz_2010_us_outline_500k.json');
+    }
+}
+ShapeService.ɵfac = function ShapeService_Factory(t) { return new (t || ShapeService)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"])); };
+ShapeService.ɵprov = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"]({ token: ShapeService, factory: ShapeService.ɵfac, providedIn: 'root' });
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ShapeService, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"],
+        args: [{
+                providedIn: 'root'
+            }]
+    }], function () { return [{ type: _angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"] }]; }, null); })();
+
+
+/***/ }),
+
 /***/ "AytR":
 /*!*****************************************!*\
   !*** ./src/environments/environment.ts ***!
@@ -97,6 +132,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _map_map_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map/map.component */ "cNoH");
 /* harmony import */ var _services_marker_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./_services/marker.service */ "q++V");
 /* harmony import */ var _services_pop_up_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./_services/pop-up.service */ "v+AT");
+/* harmony import */ var _services_shape_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./_services/shape.service */ "45aq");
+
 
 
 
@@ -111,7 +148,8 @@ class AppModule {
 AppModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineNgModule"]({ type: AppModule, bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_4__["AppComponent"]] });
 AppModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ factory: function AppModule_Factory(t) { return new (t || AppModule)(); }, providers: [
         _services_marker_service__WEBPACK_IMPORTED_MODULE_6__["MarkerService"],
-        _services_pop_up_service__WEBPACK_IMPORTED_MODULE_7__["PopUpService"]
+        _services_pop_up_service__WEBPACK_IMPORTED_MODULE_7__["PopUpService"],
+        _services_shape_service__WEBPACK_IMPORTED_MODULE_8__["ShapeService"]
     ], imports: [[
             _angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__["BrowserModule"],
             _app_routing_module__WEBPACK_IMPORTED_MODULE_3__["AppRoutingModule"],
@@ -135,7 +173,8 @@ AppModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector
                 ],
                 providers: [
                     _services_marker_service__WEBPACK_IMPORTED_MODULE_6__["MarkerService"],
-                    _services_pop_up_service__WEBPACK_IMPORTED_MODULE_7__["PopUpService"]
+                    _services_pop_up_service__WEBPACK_IMPORTED_MODULE_7__["PopUpService"],
+                    _services_shape_service__WEBPACK_IMPORTED_MODULE_8__["ShapeService"]
                 ],
                 bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_4__["AppComponent"]]
             }]
@@ -158,6 +197,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! leaflet */ "4R65");
 /* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(leaflet__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _services_marker_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../_services/marker.service */ "q++V");
+/* harmony import */ var _services_shape_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../_services/shape.service */ "45aq");
+
 
 
 
@@ -177,13 +218,19 @@ const iconDefault = leaflet__WEBPACK_IMPORTED_MODULE_1__["icon"]({
 });
 leaflet__WEBPACK_IMPORTED_MODULE_1__["Marker"].prototype.options.icon = iconDefault;
 class MapComponent {
-    constructor(markerService) {
+    constructor(markerService, shapeService) {
         this.markerService = markerService;
+        this.shapeService = shapeService;
     }
     ngAfterViewInit() {
         this.initMap();
         //this.markerService.makeCapitalMarkers(this.map);
+        //this.markerService.makeCapitalCircleMarkers(this.map);
         this.markerService.makeCapitalCircleMarkers(this.map);
+        this.shapeService.getStateShapes().subscribe(states => {
+            this.states = states;
+            this.initStatesLayer();
+        });
     }
     initMap() {
         this.map = leaflet__WEBPACK_IMPORTED_MODULE_1__["map"]('map', {
@@ -196,8 +243,40 @@ class MapComponent {
         });
         tiles.addTo(this.map);
     }
+    initStatesLayer() {
+        const stateLayer = leaflet__WEBPACK_IMPORTED_MODULE_1__["geoJSON"](this.states, {
+            style: (feature) => ({
+                weight: 3,
+                opacity: 0.5,
+                color: '#911180',
+                fillOpacity: 0.8,
+                fillColor: '#47c720'
+            })
+        });
+        this.map.addLayer(stateLayer);
+    }
+    highlightFeature(e) {
+        const layer = e.target;
+        layer.setStyle({
+            weight: 10,
+            opacity: 1.0,
+            color: '#DFA612',
+            fillOpacity: 1.0,
+            fillColor: '#FAE042',
+        });
+    }
+    resetFeature(e) {
+        const layer = e.target;
+        layer.setStyle({
+            weight: 3,
+            opacity: 0.5,
+            color: '#008f68',
+            fillOpacity: 0.8,
+            fillColor: '#6DB65B'
+        });
+    }
 }
-MapComponent.ɵfac = function MapComponent_Factory(t) { return new (t || MapComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_services_marker_service__WEBPACK_IMPORTED_MODULE_2__["MarkerService"])); };
+MapComponent.ɵfac = function MapComponent_Factory(t) { return new (t || MapComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_services_marker_service__WEBPACK_IMPORTED_MODULE_2__["MarkerService"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_services_shape_service__WEBPACK_IMPORTED_MODULE_3__["ShapeService"])); };
 MapComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({ type: MapComponent, selectors: [["app-map"]], decls: 3, vars: 0, consts: [[1, "map-container"], [1, "map-frame"], ["id", "map"]], template: function MapComponent_Template(rf, ctx) { if (rf & 1) {
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "div", 0);
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](1, "div", 1);
@@ -212,7 +291,7 @@ MapComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineCompo
                 templateUrl: './map.component.html',
                 styleUrls: ['./map.component.scss']
             }]
-    }], function () { return [{ type: _services_marker_service__WEBPACK_IMPORTED_MODULE_2__["MarkerService"] }]; }, null); })();
+    }], function () { return [{ type: _services_marker_service__WEBPACK_IMPORTED_MODULE_2__["MarkerService"] }, { type: _services_shape_service__WEBPACK_IMPORTED_MODULE_3__["ShapeService"] }]; }, null); })();
 
 
 /***/ }),
@@ -261,16 +340,10 @@ class MarkerService {
             for (const c of res.features) {
                 const lat = c.geometry.coordinates[0];
                 const lon = c.geometry.coordinates[1];
-                //const circle = L.circleMarker([lon, lat]).addTo(map);
-                //   const circle = L.circleMarker([lon, lat],
-                //     {
-                //       radius: 20
-                //     }
-                // ).addTo(map);
                 const circle = leaflet__WEBPACK_IMPORTED_MODULE_1__["circleMarker"]([lon, lat], {
                     radius: MarkerService.ScaledRadius(c.properties.population, maxVal)
-                }); //.addTo(map);
-                circle.bindPopup(this.popupService.makeCapitalPopup(c));
+                });
+                circle.bindPopup(this.popupService.makeCapitalPopup(c.properties));
                 circle.addTo(map);
             }
         });
